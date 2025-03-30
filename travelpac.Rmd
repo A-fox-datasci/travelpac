@@ -1,0 +1,38 @@
+---
+title: "Travelpac Analysis Project"
+output: html_document
+date: "`r Sys.Date()`"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Overseas Travel and Tourism: An Analysis ###
+
+## The data ##
+The Travelpac dataset, found on the Office for National Statistics website here (https://www.ons.gov.uk/peoplepopulationandcommunity/leisureandtourism/datasets/travelpac), contains estimates of international visits with details on traveller age and sex, trip purpose, length, and spending from the International Passenger Survey (IPS). 
+
+
+## Our Aims ##
+
+We wish to generate insights on tourism trends and habits, which can be used in a multitude of applications. We will pretend to work for a fictional travel agent. We wish to maximise our profit on our new luxury travel package, and need to work out who to advertise this to.
+
+### Set up ###
+
+# Packages #
+We load our packages. The tidyverse library contains the dplyr package, which will be useful for data handling, and the ggplot2 package, which we will use for visualisations.
+
+```{r}
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(readxl))
+```
+
+# Data #
+
+Let us load in our raw data.
+
+```{r}
+travel_raw=read_excel('travelpac_raw/Travelpac 2023.xlsx')
+```
+
