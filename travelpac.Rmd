@@ -33,6 +33,33 @@ suppressPackageStartupMessages(library(readxl))
 Let us load in our raw data.
 
 ```{r}
-travel_raw=read_excel('travelpac_raw/Travelpac 2023.xlsx')
+travel_raw=read_excel('travelpac_raw/Travelpac 2023.xlsx', 
+                      sheet=2)
+```
+
+### Exploratory Analysis ###
+
+# Summary #
+
+Let's take a quick look at the data structure.
+
+```{r}
+summary(travel_raw)
+```
+
+We have some categorical variables, which we can use to stratify the data, such as sex, age group and travel purpose, and we have some numeric results, from which we can generate insights.
+
+# Cleaning #
+
+We notice from looking at the dataset, that we have some NAs in the Sex variable. It is not clear how best to impute these, so we will just exclude these rows from the analysis.
+
+```{r}
+travel_cleaned <- travel_raw %>% drop_na(Sex)
+```
+
+We also have 'D/K' terms appearing in the age group column. Let's remove these.
+
+```{r}
+travel_cleaned2 <- travel_cleaned[travel_cleaned$Age != 'D/K',]
 ```
 
