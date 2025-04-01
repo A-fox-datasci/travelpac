@@ -8,7 +8,7 @@ date: "`r Sys.Date()`"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-### Overseas Travel and Tourism: An Analysis ###
+# Overseas Travel and Tourism: An Analysis #
 
 ## The data ##
 The Travelpac dataset, found on the Office for National Statistics website here (https://www.ons.gov.uk/peoplepopulationandcommunity/leisureandtourism/datasets/travelpac), contains estimates of international visits with details on traveller age and sex, trip purpose, length, and spending from the International Passenger Survey (IPS). 
@@ -18,17 +18,18 @@ The Travelpac dataset, found on the Office for National Statistics website here 
 
 We wish to generate insights on tourism trends and habits, which can be used in a multitude of applications. We will pretend to work for a fictional travel agent. We wish to maximise our profit on our new luxury travel package, and need to work out who to advertise this to.
 
-### Set up ###
+# Set up #
 
-# Packages #
+### Packages ###
 We load our packages. The tidyverse library contains the dplyr package, which will be useful for data handling, and the ggplot2 package, which we will use for visualisations.
 
 ```{r}
 suppressPackageStartupMessages(library(tidyverse))
 suppressPackageStartupMessages(library(readxl))
+suppressPackageStartupMessages(library(paletteer))
 ```
 
-# Data #
+### Data ###
 
 Let us load in our raw data.
 
@@ -37,9 +38,9 @@ travel_raw=read_excel('travelpac_raw/Travelpac 2023.xlsx',
                       sheet=2)
 ```
 
-### Exploratory Analysis ###
+# Exploratory Analysis #
 
-# Summary #
+### Summary ###
 
 Let's take a quick look at the data structure.
 
@@ -49,7 +50,7 @@ summary(travel_raw)
 
 We have some categorical variables, which we can use to stratify the data, such as sex, age group and travel purpose, and we have some numeric results, from which we can generate insights.
 
-# Cleaning #
+### Cleaning ###
 
 We notice from looking at the dataset, that we have some NAs in the Sex variable. It is not clear how best to impute these, so we will just exclude these rows from the analysis.
 
@@ -61,5 +62,57 @@ We also have 'D/K' terms appearing in the age group column. Let's remove these.
 
 ```{r}
 travel_cleaned2 <- travel_cleaned[travel_cleaned$Age != 'D/K',]
+```
+
+We will standardise the variable names for ease of future use. This step is not required, but I prefer to have a consistent styling.
+
+```{r}
+travel_cleaned3 <- travel_cleaned2 %>% rename(year=Year,
+                                              age=Age,
+                                              sex=Sex)
+```
+
+We have a few final things to tidy up before we are ready to do some analysis. First, every single year in this data extract is 2023, so this is an unnecessary column to have. Secondly, there is a value of '0' in the country column - let's remove this row. Sample is a row containing information on the number of sources used when creating the dataset. Whilst useful, this is not particularly relevant to our use case, so we will drop this. Lastly, let us create an analysis flag for UK residents.
+
+```{r}
+travel_final <- travel_cleaned3 %>% 
+                  select(-year,-sample) %>%
+                  filter(country != '0') %>%
+                  mutate(ukfl=ifelse(ukos=='UK residents',1,0))
+```
+
+## Analysis ##
+
+Now that we have cleaned the data, we can start looking at some generating some valuable insights.
+
+### 1. Countries Most Frequently Visited by UK Residents ###
+
+```{r}
+t10cntry <- travel_final %>% 
+              filter(is.na(visits)==0 & ukfl==1) %>%
+              group_by(country) %>%
+              summarise(tot_vis = sum(visits)) %>%
+              arrange(desc(tot_vis)) %>%
+              head(10)
+
+ggplot(t10cntry, aes(x = reorder(country, -tot_vis), y = tot_vis, 
+                     fill = ifelse(country %in% c("Spain", "France"), "darkred", "lightcoral"))) +
+  geom_col() +
+  labs(title = "Spain and France the Most Popular Tourist Destination for Brits", x='', y = "Total Visits") +
+  theme_minimal() +
+  scale_fill_identity() + 
+  theme(
+    axis.text.y = element_text(color = "grey70"),  # Pale y-axis tick labels
+    axis.text.x = element_text(color = "black"),   # Dark x-axis tick labels
+    axis.ticks.x = element_blank(),               # Remove x-axis tick marks
+    panel.grid.major.x = element_blank(),         # Remove vertical grid lines
+    panel.grid.minor.x = element_blank(),         
+    panel.grid.major.y = element_line(color = "grey80"),  # Keep only horizontal grid lines
+    panel.grid.minor.y = element_blank()          # Remove minor y grid lines
+  ) +
+  scale_y_continuous(
+    breaks = c(0, 5000000, 10000000, 15000000),   # Custom tick positions
+    labels = c('0','5m','10m','15m')   # Custom labels
+  )
 ```
 
