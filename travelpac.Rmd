@@ -179,3 +179,18 @@ ggplot(travel_quart, aes(x=reorder(quarter,quart_ord), y=mn_visnum, fill=quarter
   ))
 ```
 
+## Statistical Analysis ##
+
+We would like to determine which factors affect nightly expenditure, so that we can decide where to focus our marketing efforts. We will do this by fitting a linear model.
+
+```{r}
+travel_final_spend2 <- travel_final %>% 
+             filter(is.na(expend)==0 & is.na(nights)==0 & nights !=0) %>%
+             mutate(expend_night=expend/nights)
+
+lmod1 <- lm(data=travel_final_spend2, formula = expend_night ~ sex + quarter + ukfl + age)
+
+summary(lmod1)
+```
+
+The overall F statistic has a p-value which suggests at least one of our varuables has an effect on nightly expenditure. Notably, the R-squared is quite low, suggesting the rudimentary model we have formed is not a great fit. Let us see if we can improve this.
