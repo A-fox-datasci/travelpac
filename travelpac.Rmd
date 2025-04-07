@@ -144,3 +144,38 @@ ggplot(travel_final_spend, aes(x=sex,y=expend_night,fill=sex)) +
   )
 ```
 
+### Quarterly Visits ###
+
+```{r}
+travel_quart <- travel_final %>%
+                  filter(is.na(visits)==0) %>%
+                  group_by(quarter) %>%
+                  summarise(mn_visnum=mean(visits)) %>%
+                  arrange(desc(mn_visnum)) %>%
+                  mutate(quart_ord=case_when(
+                    quarter=='Jan-Mar' ~ 1, 
+                    quarter=='Apr-Jun' ~ 2, 
+                    quarter=='Jul-Sep' ~ 3,
+                    quarter=='Oct-Dec' ~ 4))
+
+ggplot(travel_quart, aes(x=reorder(quarter,quart_ord), y=mn_visnum, fill=quarter)) +
+  geom_bar(stat='identity', width=0.6, color='grey30') +
+  labs(title = "Travel in Winter for a Quieter Trip", x='', y = "Average Number of Visits") +
+  theme_minimal() +
+  theme(
+    axis.text.y = element_text(color = "grey70"),  # Pale y-axis tick labels
+    axis.text.x = element_text(color = "black"),   # Dark x-axis tick labels
+    axis.ticks.x = element_blank(),               # Remove x-axis tick marks
+    panel.grid.major.x = element_blank(),         # Remove vertical grid lines
+    panel.grid.minor.x = element_blank(),         
+    panel.grid.major.y = element_line(color = "grey80"),  # Keep only horizontal grid lines
+    panel.grid.minor.y = element_blank()          # Remove minor y grid lines
+  ) +
+  scale_fill_manual(values = c(  
+    "Jan-Mar" = "#A8DADC",   # soft icy blue (winter)
+   "Apr-Jun" = "#81B29A",   # fresh sage green (spring)
+   "Jul-Sep" = "#F4A261",   # warm orange (summer)
+   "Oct-Dec" = "#E76F51"    # rustic red-orange (autumn)) 
+  ))
+```
+
