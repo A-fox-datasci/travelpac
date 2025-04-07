@@ -116,3 +116,31 @@ ggplot(t10cntry, aes(x = reorder(country, -tot_vis), y = tot_vis,
   )
 ```
 
+### 2. Expenditure by Sex ###
+
+```{r}
+spend_sex <- travel_final %>% 
+             filter(is.na(expend)==0 & is.na(nights)==0 & nights !=0) %>%
+             group_by(sex) %>%
+             summarise(mn_expend_night=mean(expend/nights))
+
+travel_final_spend <- travel_final %>% 
+             filter(is.na(expend)==0 & is.na(nights)==0 & nights !=0) %>%
+             mutate(expend_night=expend/nights) %>%
+             filter((sex=='Male' | sex=='Female') & expend_night < 500)
+
+ggplot(travel_final_spend, aes(x=sex,y=expend_night,fill=sex)) + 
+  geom_boxplot() + 
+  labs(title = "Men Spend More Per Night than Women", x='', y = "Average Nightly Expenditure") +
+  theme_minimal() +
+  theme(
+    axis.text.y = element_text(color = "grey70"),  # Pale y-axis tick labels
+    axis.text.x = element_text(color = "black"),   # Dark x-axis tick labels
+    axis.ticks.x = element_blank(),               # Remove x-axis tick marks
+    panel.grid.major.x = element_blank(),         # Remove vertical grid lines
+    panel.grid.minor.x = element_blank(),         
+    panel.grid.major.y = element_line(color = "grey80"),  # Keep only horizontal grid lines
+    panel.grid.minor.y = element_blank()          # Remove minor y grid lines
+  )
+```
+
